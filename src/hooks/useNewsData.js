@@ -1,0 +1,36 @@
+import { useEffect, useState } from "react";
+
+const useNewsData = (category, searchTerm) => {
+    const [newsData, setNewsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        async function fetchNewData(){
+            try {
+                setLoading(true);
+
+                const apiKey = process.env.REACT_APP_GNEWS_API_KEY;
+                const apiUrl = `https://gnews.io/api/v4/top-headlines?lang=en&token=${apiKey}`;
+                const categoryParam = category ? `&topic=${category}` : "";
+                const searchParam = searchTerm ? `&q=${searchTerm}` : "";
+                const url = apiUrl + categoryParam + searchParam;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                setNewsData(data.articles);
+                setLoading(false);
+            } catch (error) {
+                setError(error);
+                setLoading(false);
+            }
+        }
+
+        fetchNewData();
+
+    }, [category, searchTerm]);
+
+    return { newsData, loading, error };
+};
+
+export default useNewsData;
